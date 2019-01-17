@@ -118,6 +118,8 @@ private:
   int value_tau_decaymode[max_tau];
   float value_tau_chargediso[max_tau];
   float value_tau_neutraliso[max_tau];
+  float value_tau_relisochg[max_tau]; //build two additional branches  
+  float value_tau_relisoneut[max_tau];
 
   // Photons
   const static int max_ph = 100;
@@ -147,15 +149,33 @@ private:
   float value_jet_mass[max_jet];
 
   // Generator particles
-  /*
-  const static int max_gen = 1000;
-  UInt_t value_gen_n;
-  float value_gen_pt[max_gen];
-  float value_gen_eta[max_gen];
-  float value_gen_phi[max_gen];
-  float value_gen_mass[max_gen];
-  int value_gen_pdgid[max_gen];
-  */
+
+  	//Electrons
+ 	const static int max_gen = 1000;
+ 	UInt_t value_gen_el_n;
+ 	float value_gen_el_pt[max_gen];
+  	float value_gen_el_eta[max_gen];
+  	float value_gen_el_phi[max_gen];
+  	float value_gen_el_mass[max_gen];
+ 	// int value_gen_el_pdgid[max_gen]; only pdg-electrons considered
+
+ 	//Muons
+ 	UInt_t value_gen_mu_n;
+	float value_gen_mu_pt[max_gen];
+	float value_gen_mu_eta[max_gen];
+	float value_gen_mu_phi[max_gen];
+	float value_gen_mu_mass[max_gen];
+	
+	//Taus
+	UInt_t value_gen_tau_n;
+	float value_gen_tau_pt[max_gen];
+	float value_gen_tau_eta[max_gen];
+	float value_gen_tau_phi[max_gen];
+        float value_gen_tau_mass[max_gen];
+
+
+
+ 
 };
 
 AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig) {
@@ -213,6 +233,9 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig) {
   tree->Branch("Tau_decayMode", value_tau_decaymode, "Tau_decayMode[nTau]/I");
   tree->Branch("Tau_chargedIso", value_tau_chargediso, "Tau_chargedIso[nTau]/F");
   tree->Branch("Tau_neutralIso", value_tau_neutraliso, "Tau_neutralIso[nTau]/F");
+  tree->Branch("Tau_reliso_charged", value_tau_relisochg, "Tau_reliso_charged[nTau]"); 
+  tree->Branch("Tau_reliso_gamma", value_tau_relisoneut, "Tau_reliso_gamma[nTau]");
+
 
   // Photons
   tree->Branch("nPhoton", &value_ph_n, "nPhoton/i");
@@ -240,14 +263,31 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig) {
   tree->Branch("Jet_mass", value_jet_mass, "Jet_mass[nJet]/F");
 
   // Generator particles
-  /*
-  tree->Branch("nGenPart", &value_gen_n, "nGenPart/i");
-  tree->Branch("GenPart_pt", value_gen_pt, "GenPart_pt[nGenPart]/F");
-  tree->Branch("GenPart_eta", value_gen_eta, "GenPart_eta[nGenPart]/F");
-  tree->Branch("GenPart_phi", value_gen_phi, "GenPart_phi[nGenPart]/F");
-  tree->Branch("GenPart_mass", value_gen_mass, "GenPart_mass[nGenPart]/F");
-  tree->Branch("GenPart_pdgId", value_gen_pdgid, "GenPart_pdgId[nGenPart]/I");
-  */
+	//Electrons  
+ 	  tree->Branch("nGenPart_el", &value_gen_el_n, "nGenPart/i");
+	  tree->Branch("GenPart_el_pt", value_gen_el_pt, "GenPart_pt[nGenPart]/F");
+	  tree->Branch("GenPart_el_eta", value_gen_el_eta, "GenPart_eta[nGenPart]/F");
+	  tree->Branch("GenPart_el_phi", value_gen_el_phi, "GenPart_phi[nGenPart]/F");
+ 	  tree->Branch("GenPart_el_mass", value_gen_el_mass, "GenPart_mass[nGenPart]/F");
+  // tree->Branch("GenPart_el_pdgId", value_gen_pdgid, "GenPart_pdgId[nGenPart]/I");//should be 11 anyway since matched after pdgId
+	 //Muons
+ 
+	  tree->Branch("nGenPart_mu", &value_gen_mu_n, "nGenPart/i");
+          tree->Branch("GenPart_mu_pt", value_gen_mu_pt, "GenPart_pt[nGenPart]/F");
+          tree->Branch("GenPart_mu_eta", value_gen_mu_eta, "GenPart_eta[nGenPart]/F");
+          tree->Branch("GenPart_mu_phi", value_gen_mu_phi, "GenPart_phi[nGenPart]/F");
+          tree->Branch("GenPart_mu_mass", value_gen_mu_mass, "GenPart_mass[nGenPart]/F");
+
+	//Taus
+   	  tree->Branch("nGenPart_tau", &value_gen_tau_n, "nGenPart/i");
+          tree->Branch("GenPart_tau_pt", value_gen_tau_pt, "GenPart_pt[nGenPart]/F");
+          tree->Branch("GenPart_tau_eta", value_gen_tau_eta, "GenPart_eta[nGenPart]/F");
+          tree->Branch("GenPart_tau_phi", value_gen_tau_phi, "GenPart_phi[nGenPart]/F");
+          tree->Branch("GenPart_tau_mass", value_gen_tau_mass, "GenPart_mass[nGenPart]/F");
+
+
+
+ 
 }
 
 AOD2NanoAOD::~AOD2NanoAOD() {}
@@ -278,7 +318,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   iEvent.getByLabel(InputTag("muons"), muons);
 
   value_mu_n = 0;
-  const float mu_min_pt = 3;
+  const float mu_min_pt = 10;
   for (auto it = muons->begin(); it != muons->end(); it++) {
     if (it->pt() > mu_min_pt) {
       value_mu_pt[value_mu_n] = it->pt();
@@ -289,7 +329,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       if (it->isPFMuon() && it->isPFIsolationValid()) {
         auto iso03 = it->pfIsolationR03();
         value_mu_pfreliso03all[value_mu_n] =
-            (iso03.sumChargedHadronPt + iso03.sumNeutralHadronEt + iso03.sumPhotonEt)/it->pt();
+            (iso03.sumChargedHadronPt + iso03.sumNeutralHadronEt + iso03.sumPhotonEt)/it->pt(); 
         auto iso04 = it->pfIsolationR04();
         value_mu_pfreliso04all[value_mu_n] =
             (iso04.sumChargedHadronPt + iso04.sumNeutralHadronEt + iso04.sumPhotonEt)/it->pt();
@@ -320,7 +360,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   iEvent.getByLabel(InputTag("gsfElectrons"), electrons);
 
   value_el_n = 0;
-  const float el_min_pt = 5;
+  const float el_min_pt = 10;
   for (auto it = electrons->begin(); it != electrons->end(); it++) {
     if (it->pt() > el_min_pt) {
       value_el_pt[value_el_n] = it->pt();
@@ -358,8 +398,11 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_tau_charge[value_tau_n] = it->charge();
       value_tau_mass[value_tau_n] = it->mass();
       value_tau_decaymode[value_tau_n] = it->decayMode();
-      value_tau_chargediso[value_tau_n] = it->isolationPFChargedHadrCandsPtSum();
-      value_tau_neutraliso[value_tau_n] = it->isolationPFGammaCandsEtSum();
+      value_tau_chargediso[value_tau_n] = it->isolationPFChargedHadrCandsPtSum(); //not relative Isolation(?)
+      value_tau_neutraliso[value_tau_n] = it->isolationPFGammaCandsEtSum();	//" " only gammas!
+      
+      value_tau_relisochg[value_tau_n] = it->isolationPFChargedHadrCandsPtSum()/it->pt(); //richtig rum?
+      value_tau_relisoneut[value_tau_n] =it->isolationPFGammaCandsEtSum()/it->pt();
       value_tau_n++;
     }
   }
@@ -411,24 +454,75 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   }
 
   // Generator particles
-  /*
+	 
   Handle<GenParticleCollection> gens;
   iEvent.getByLabel(InputTag("genParticles"), gens);
+	const float gen_max_pt = 15000;
 
-  value_gen_n = 0;
-  for (auto it = gens->begin(); it != gens->end(); it++) {
-    if (it->status() == 1) {
-      value_gen_pt[value_gen_n] = it->pt();
-      value_gen_eta[value_gen_n] = it->eta();
-      value_gen_phi[value_gen_n] = it->phi();
-      value_gen_mass[value_gen_n] = it->mass();
-      value_gen_pdgid[value_gen_n] = it->pdgId();
-      value_gen_n++;
-    }
+
+  //Electrons
+	value_gen_mu_n = 0;
+	value_gen_el_n = 0;
+	value_gen_tau_n = 0; 
+ for (auto it = gens->begin(); it != gens->end(); it++) {
+
+   	 if (it->status() == 1 && std::abs(it->pdgId())==11 ) {	//find generatorinfo for PDG Electrons
+   		if(it->pt() < gen_max_pt){
+			value_gen_el_pt[value_gen_el_n] = it->pt();
+    	 	 	value_gen_el_eta[value_gen_el_n] = it->eta();
+     		 	value_gen_el_phi[value_gen_el_n] = it->phi();
+     		 	value_gen_el_mass[value_gen_el_n] = it->mass();
+ 		   // 	value_gen__pdgid[value_gen_n] = it->pdgId(); //useless since matched via pdgid
+  	   	 	value_gen_el_n++;
+		}
+	}
+	//Muons
+	 if (it->status() == 1 && std::abs(it->pdgId()) == 13 ) {   //find generatorinfo for PDG Muons
+                if(it->pt() < gen_max_pt){
+			value_gen_mu_pt[value_gen_mu_n] = it->pt();
+	                value_gen_mu_eta[value_gen_mu_n] = it->eta();
+                	value_gen_mu_phi[value_gen_mu_n] = it->phi();
+                	value_gen_mu_mass[value_gen_mu_n] = it->mass();
+                	value_gen_mu_n++;
+		}
+
+
+	}
+
+	
+	//Taus
+	if (it->status() == 1 && std::abs(it->pdgId()) == 15){
+		if(it->pt() < gen_max_pt){
+			value_gen_tau_pt[value_gen_tau_n] = it->pt();
+			value_gen_tau_eta[value_gen_tau_n] = it->eta();
+                	value_gen_tau_phi[value_gen_tau_n] = it->phi();
+      	  	  	value_gen_tau_mass[value_gen_tau_n] = it->mass();  //already visible mass?
+                        value_gen_tau_n++;
+                        
+
+		}
+
+
+   	 }
+ }
+	
+/*
+	//Muons
+	 value_gen_mu_n = 0;
+         for (auto it = gens->begin(); it != gens->end(); it++) {
+         if (it->status() == 1 && it->pdgId()==13 ) {   //find generatorinfo for PDG Muons
+                 value_gen_mu_pt[value_gen_mu_n] = it->pt();
+                 value_gen_mu_eta[value_gen_mu_n] = it->eta();
+                 value_gen_mu_phi[value_gen_mu_n] = it->phi();
+                 value_gen_mu_mass[value_gen_mu_n] = it->mass();
+		 value_gen_mu_n++;	
+
+  	}
   }
-  */
 
-  // Fill event
+*/
+	
+  // Fill Tree
   tree->Fill();
 }
 
