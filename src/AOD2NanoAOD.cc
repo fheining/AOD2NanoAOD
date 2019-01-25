@@ -62,6 +62,7 @@ private:
   virtual void analyze(const edm::Event &, const edm::EventSetup &);
   virtual void endJob();
   bool providesGoodLumisection(const edm::Event &iEvent);
+  bool isDataFlag_;
 
   TTree *tree;
 
@@ -149,9 +150,9 @@ private:
   float value_jet_mass[max_jet];
 
   // Generator particles
-
+	
   	//Electrons
- 	const static int max_gen = 1000;
+	const static int max_gen = 500;
  	UInt_t value_gen_el_n;
  	float value_gen_el_pt[max_gen];
   	float value_gen_el_eta[max_gen];
@@ -167,18 +168,23 @@ private:
 	float value_gen_mu_mass[max_gen];
 	
 	//Taus
+//	std::vector<ROOT::Math::XYZTVector>  tracks;
+
+
 	UInt_t value_gen_tau_n;
 	float value_gen_tau_pt[max_gen];
 	float value_gen_tau_eta[max_gen];
 	float value_gen_tau_phi[max_gen];
         float value_gen_tau_mass[max_gen];
-
+	
 
 
  
 };
 
-AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig) {
+AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig):
+	isDataFlag_(iConfig.getParameter<bool>("isData"))
+{
   edm::Service<TFileService> fs;
 
   tree = fs->make<TTree>("Events", "Events");
@@ -262,6 +268,8 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig) {
   tree->Branch("Jet_phi", value_jet_phi, "Jet_phi[nJet]/F");
   tree->Branch("Jet_mass", value_jet_mass, "Jet_mass[nJet]/F");
 
+
+	if(isDataFlag_ == false){	
   // Generator particles
 	//Electrons  
  	  tree->Branch("nGenPart_el", &value_gen_el_n, "nGenPart/i");
@@ -285,7 +293,7 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig) {
           tree->Branch("GenPart_tau_phi", value_gen_tau_phi, "GenPart_phi[nGenPart]/F");
           tree->Branch("GenPart_tau_mass", value_gen_tau_mass, "GenPart_mass[nGenPart]/F");
 
-
+	}
 
  
 }
@@ -401,7 +409,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_tau_chargediso[value_tau_n] = it->isolationPFChargedHadrCandsPtSum(); //not relative Isolation(?)
       value_tau_neutraliso[value_tau_n] = it->isolationPFGammaCandsEtSum();	//" " only gammas!
       
-      value_tau_relisochg[value_tau_n] = it->isolationPFChargedHadrCandsPtSum()/it->pt(); //richtig rum?
+      value_tau_relisochg[value_tau_n] = it->isolationPFChargedHadrCandsPtSum()/it->pt();
       value_tau_relisoneut[value_tau_n] =it->isolationPFGammaCandsEtSum()/it->pt();
       value_tau_n++;
     }
@@ -454,7 +462,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   }
 
   // Generator particles
-	 
+if (isDataFlag_ == false){	 
   Handle<GenParticleCollection> gens;
   iEvent.getByLabel(InputTag("genParticles"), gens);
 	const float gen_max_pt = 15000;
@@ -491,39 +499,28 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 
 	
 	//Taus
-	if (it->status() == 1 && std::abs(it->pdgId()) == 15){
+	if (it->status() == 2 && std::abs(it->pdgId()) == 15){
+		//std::cout << "tau: " << value_gen_tau_n << "pt: " << it->pt() << std::endl;
 		if(it->pt() < gen_max_pt){
 			value_gen_tau_pt[value_gen_tau_n] = it->pt();
 			value_gen_tau_eta[value_gen_tau_n] = it->eta();
                 	value_gen_tau_phi[value_gen_tau_n] = it->phi();
-      	  	  	value_gen_tau_mass[value_gen_tau_n] = it->mass();  //already visible mass?
+      	  	  	value_gen_tau_mass[value_gen_tau_n] = it->mass(); 
                         value_gen_tau_n++;
-                        
+            	            
 
 		}
 
 
    	 }
  }
-	
-/*
-	//Muons
-	 value_gen_mu_n = 0;
-         for (auto it = gens->begin(); it != gens->end(); it++) {
-         if (it->status() == 1 && it->pdgId()==13 ) {   //find generatorinfo for PDG Muons
-                 value_gen_mu_pt[value_gen_mu_n] = it->pt();
-                 value_gen_mu_eta[value_gen_mu_n] = it->eta();
-                 value_gen_mu_phi[value_gen_mu_n] = it->phi();
-                 value_gen_mu_mass[value_gen_mu_n] = it->mass();
-		 value_gen_mu_n++;	
+}
 
-  	}
-  }
 
-*/
 	
   // Fill Tree
-  tree->Fill();
+tree->Fill();
+	 	
 }
 
 void AOD2NanoAOD::beginJob() {}

@@ -13,11 +13,14 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
 # Set the maximum number of events to be processed (-1 processes all events)
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(7000))
 
 # Define files of dataset
-files = FileUtils.loadListFromFile("data/CMS_MonteCarlo2012_Summer12_DR53X_TTbar_8TeV-Madspin_aMCatNLO-herwig_AODSIM_PU_S10_START53_V19-v2_00000_file_index.txt")
-files.extend(FileUtils.loadListFromFile("data/CMS_MonteCarlo2012_Summer12_DR53X_TTbar_8TeV-Madspin_aMCatNLO-herwig_AODSIM_PU_S10_START53_V19-v2_20000_file_index.txt"))
+
+files = FileUtils.loadListFromFile("data/CMS_MonteCarlo2012_Summer12_DR53X_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_RD1_START53_V7N-v1_20000_file_index.txt")
+files.extend(FileUtils.loadListFromFile("data/CMS_MonteCarlo2012_Summer12_DR53X_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_RD1_START53_V7N-v1_20001_file_index.txt"))
+files.extend(FileUtils.loadListFromFile("data/CMS_MonteCarlo2012_Summer12_DR53X_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_RD1_START53_V7N-v1_20002_file_index.txt"))
+
 
 process.source = cms.Source(
     "PoolSource", fileNames=cms.untracked.vstring(*files))
@@ -29,7 +32,9 @@ process.GlobalTag.globaltag = "START53_V27::All"
 process.source.skipEvents = cms.untracked.uint32(0)
 
 # Register fileservice for output file
-process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD")
+process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD",
+	isData = cms.bool(False)
+)
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("output.root"))
 

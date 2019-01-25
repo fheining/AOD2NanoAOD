@@ -15,7 +15,7 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
 # Set the maximum number of events to be processed (-1 processes all events)
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(5000))
 
 # Define files of dataset
 files = FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_10000_file_index.txt")
@@ -42,8 +42,17 @@ process.source.lumisToProcess.extend(myLumis)
 # Number of events to be skipped (0 by default)
 process.source.skipEvents = cms.untracked.uint32(0)
 
+#register fservice
+
+
+process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD",
+        isData = cms.bool(True)
+)
+
+
+
 # Register fileservice for output file
-process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD")
+#process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD")
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("output.root"))
 
