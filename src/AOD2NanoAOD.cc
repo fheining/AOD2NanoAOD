@@ -122,6 +122,10 @@ private:
 	float value_tau_relisochg[max_tau]; //build additional branches  
 	float value_tau_relisoneut[max_tau];
 	
+	bool value_tau_matched_tau[max_tau];
+	bool value_tau_matched_mu[max_tau];
+	bool value_tau_matched_el[max_tau];
+	
 		//Electron rejection
 		float value_tau_emFraction[max_tau];	// HCAL/ECAL
 		float value_tau_hcalTotOverPLead[max_tau];
@@ -261,7 +265,7 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig):
 	tree->Branch("Tau_neutralIso", value_tau_neutraliso, "Tau_neutralIso[nTau]/F");
 	tree->Branch("Tau_reliso_charged", value_tau_relisochg, "Tau_reliso_charged[nTau]/F"); 
 	tree->Branch("Tau_reliso_gamma", value_tau_relisoneut, "Tau_reliso_gamma[nTau]/F");
-	
+		
 	tree->Branch("Tau_emFraction", value_tau_emFraction, "Tau_emFraction[nTau]/F");
 	tree->Branch("Tau_hcalTotOverPLead", value_tau_hcalTotOverPLead, "Tau_hcalTotOverPLead[nTau]/F");
 	tree->Branch("Tau_hcalMaxOverPLead", value_tau_hcalMaxOverPLead, "Tau_hcalMaxOverPLead[nTau]/F");
@@ -275,6 +279,16 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig):
 	tree->Branch("Tau_caloComp", value_tau_caloComp, "Tau_caloComp[nTau]/F");
 	tree->Branch("Tau_segComp", value_tau_segComp, "Tau_segComp[nTau]/F");
 	tree->Branch("Tau_muonDecision", value_tau_muonDecision, "Tau_muonDecision[nTau]/O");
+
+if(isDataFlag_ == false){	
+	tree->Branch("Tau_matched_tau", value_tau_matched_tau, "Tau_matched_tau[nTau]/O");
+	tree->Branch("Tau_matched_mu", value_tau_matched_mu, "Tau_matched_mu[nTau]/O");
+	tree->Branch("Tau_matched_el", value_tau_matched_el, "Tau_matched_el[nTau]/O");	
+}
+
+
+
+
 
 	// Photons
 	tree->Branch("nPhoton", &value_ph_n, "nPhoton/i");
@@ -304,27 +318,27 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig):
 
 	if(isDataFlag_ == false){	
   // Generator particles
-	//Electrons  
- 	  tree->Branch("nGenPart_el", &value_gen_el_n, "nGenPart/i");
-	  tree->Branch("GenPart_el_pt", value_gen_el_pt, "GenPart_pt[nGenPart]/F");
-	  tree->Branch("GenPart_el_eta", value_gen_el_eta, "GenPart_eta[nGenPart]/F");
-	  tree->Branch("GenPart_el_phi", value_gen_el_phi, "GenPart_phi[nGenPart]/F");
- 	  tree->Branch("GenPart_el_mass", value_gen_el_mass, "GenPart_mass[nGenPart]/F");
-  // tree->Branch("GenPart_el_pdgId", value_gen_pdgid, "GenPart_pdgId[nGenPart]/I");//should be 11 anyway since matched after pdgId
-	 //Muons
- 
-	  tree->Branch("nGenPart_mu", &value_gen_mu_n, "nGenPart/i");
-          tree->Branch("GenPart_mu_pt", value_gen_mu_pt, "GenPart_pt[nGenPart]/F");
-          tree->Branch("GenPart_mu_eta", value_gen_mu_eta, "GenPart_eta[nGenPart]/F");
-          tree->Branch("GenPart_mu_phi", value_gen_mu_phi, "GenPart_phi[nGenPart]/F");
-          tree->Branch("GenPart_mu_mass", value_gen_mu_mass, "GenPart_mass[nGenPart]/F");
 
-	//Taus
-   	  tree->Branch("nGenPart_tau", &value_gen_tau_n, "nGenPart/i");
-          tree->Branch("GenPart_tau_pt", value_gen_tau_pt, "GenPart_pt[nGenPart]/F");
-          tree->Branch("GenPart_tau_eta", value_gen_tau_eta, "GenPart_eta[nGenPart]/F");
-          tree->Branch("GenPart_tau_phi", value_gen_tau_phi, "GenPart_phi[nGenPart]/F");
-          tree->Branch("GenPart_tau_mass", value_gen_tau_mass, "GenPart_mass[nGenPart]/F");
+		//Electrons  
+		  tree->Branch("nGenPart_el", &value_gen_el_n, "nGenPart/i");
+		  tree->Branch("GenPart_el_pt", value_gen_el_pt, "GenPart_pt[nGenPart]/F");
+		  tree->Branch("GenPart_el_eta", value_gen_el_eta, "GenPart_eta[nGenPart]/F");
+		  tree->Branch("GenPart_el_phi", value_gen_el_phi, "GenPart_phi[nGenPart]/F");
+		  tree->Branch("GenPart_el_mass", value_gen_el_mass, "GenPart_mass[nGenPart]/F");
+		//Muons
+	 
+		  tree->Branch("nGenPart_mu", &value_gen_mu_n, "nGenPart/i");
+		  tree->Branch("GenPart_mu_pt", value_gen_mu_pt, "GenPart_pt[nGenPart]/F");
+		  tree->Branch("GenPart_mu_eta", value_gen_mu_eta, "GenPart_eta[nGenPart]/F");
+		  tree->Branch("GenPart_mu_phi", value_gen_mu_phi, "GenPart_phi[nGenPart]/F");
+		  tree->Branch("GenPart_mu_mass", value_gen_mu_mass, "GenPart_mass[nGenPart]/F");
+		
+		//Taus
+		  tree->Branch("nGenPart_tau", &value_gen_tau_n, "nGenPart/i");
+		  tree->Branch("GenPart_tau_pt", value_gen_tau_pt, "GenPart_pt[nGenPart]/F");
+		  tree->Branch("GenPart_tau_eta", value_gen_tau_eta, "GenPart_eta[nGenPart]/F");
+		  tree->Branch("GenPart_tau_phi", value_gen_tau_phi, "GenPart_phi[nGenPart]/F");
+		  tree->Branch("GenPart_tau_mass", value_gen_tau_mass, "GenPart_mass[nGenPart]/F");
 
 	}
 
@@ -428,10 +442,13 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   // Taus
   Handle<PFTauCollection> taus;
   iEvent.getByLabel(InputTag("hpsPFTauProducer"), taus);
+//passt das so?
+  Handle<GenParticleCollection> gens;
+  iEvent.getByLabel(InputTag("genParticles"), gens);
 
   const float tau_min_pt = 15;
   value_tau_n = 0;
-  for (auto it = taus->begin(); it != taus->end(); it++) {
+for (auto it = taus->begin(); it != taus->end(); it++) {
     if (it->pt() > tau_min_pt) {
 	value_tau_pt[value_tau_n] = it->pt();
 	value_tau_eta[value_tau_n] = it->eta();
@@ -460,10 +477,62 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 
 	value_tau_relisochg[value_tau_n] = it->isolationPFChargedHadrCandsPtSum()/it->pt();
 	value_tau_relisoneut[value_tau_n] =it->isolationPFGammaCandsEtSum()/it->pt();
-	value_tau_n++;
-    }
-  }
+	
+	//Delta R matching
+		if(isDataFlag_ == false){
 
+		Handle<GenParticleCollection> gens;
+		iEvent.getByLabel(InputTag("genParticles"), gens);
+			float pos_eta = it->eta();
+			float pos_phi = it->phi();
+			bool matched_tau = false;
+			bool matched_el = false;
+			bool matched_mu = false;
+			float DeltaRsq = 0.09;
+			
+		
+
+			for(auto genp = gens->begin(); genp != gens->end(); genp++){	//was wenn mehrere gen parts das erfüllen?
+
+				float DeltaRsq_genpart = (pos_eta - (genp->eta() ))*(pos_eta - (genp->eta() )) +(pos_phi - (genp->phi() ))*(pos_phi - (genp->phi() ));
+
+				if( DeltaRsq_genpart < DeltaRsq ){   //in DeltaR cone of 0.3
+						
+					
+
+					
+					if(std::abs(genp->pdgId()) == 15){
+					matched_tau = true;
+					matched_el = false;
+					matched_mu = false;
+					DeltaRsq = DeltaRsq_genpart;
+					}
+
+					if(std::abs(genp->pdgId()) == 11){
+					matched_el = true;
+					matched_tau = false;
+					matched_mu = false;
+					DeltaRsq = DeltaRsq_genpart;
+					}
+
+					if(std::abs(genp->pdgId()) == 13){				
+					matched_mu = true;
+					matched_tau = false;
+					matched_el = false;
+					DeltaRsq = DeltaRsq_genpart;			
+					} 
+				}		
+  				
+  			}
+			value_tau_matched_tau[value_tau_n] = matched_tau;
+			std::cout << "Tau_matched? " << value_tau_matched_tau[value_tau_n] << std::endl;
+			value_tau_matched_mu[value_tau_n] = matched_mu;
+		
+			value_tau_matched_el[value_tau_n] = matched_el;
+		}
+	value_tau_n++;
+	}	
+}
   // Photons
   Handle<PhotonCollection> photons;
   iEvent.getByLabel(InputTag("photons"), photons);
@@ -512,9 +581,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 
   // Generator particles
 if (isDataFlag_ == false){	 
-  Handle<GenParticleCollection> gens;
-  iEvent.getByLabel(InputTag("genParticles"), gens);
-	const float gen_max_pt = 15000;
+const float gen_max_pt = 15000;
 
 
   //Electrons
