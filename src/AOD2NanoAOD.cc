@@ -492,7 +492,7 @@ for (auto it = taus->begin(); it != taus->end(); it++) {
 			
 		
 
-			for(auto genp = gens->begin(); genp != gens->end(); genp++){	//was wenn mehrere gen parts das erfüllen?
+			for(auto genp = gens->begin(); genp != gens->end(); genp++){	
 
 				float DeltaRsq_genpart = (pos_eta - (genp->eta() ))*(pos_eta - (genp->eta() )) +(pos_phi - (genp->phi() ))*(pos_phi - (genp->phi() ));
 
@@ -525,9 +525,7 @@ for (auto it = taus->begin(); it != taus->end(); it++) {
   				
   			}
 			value_tau_matched_tau[value_tau_n] = matched_tau;
-			std::cout << "Tau_matched? " << value_tau_matched_tau[value_tau_n] << std::endl;
 			value_tau_matched_mu[value_tau_n] = matched_mu;
-		
 			value_tau_matched_el[value_tau_n] = matched_el;
 		}
 	value_tau_n++;
