@@ -4,7 +4,7 @@
 // Class:      AOD2NanoAOD
 
 #include <memory>
-
+#include <vector>
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 
@@ -176,33 +176,56 @@ private:
 	// Generator particles
 
 		//Electrons
-		const static int max_gen = 100;
+	const static int max_gen = 100;
+		
+
+
 		UInt_t value_gen_el_n;
-		float value_gen_el_pt[max_gen];
-		float value_gen_el_eta[max_gen];
-		float value_gen_el_phi[max_gen];
-		float value_gen_el_mass[max_gen];
-		// int value_gen_el_pdgid[max_gen]; only pdg-electrons considered
+		
+		std::vector<float> value_gen_el_pt;
+                std::vector<float>* pvalue_gen_el_pt = &value_gen_el_pt;
+
+                std::vector<float> value_gen_el_eta;
+                std::vector<float>* pvalue_gen_el_eta = &value_gen_el_eta;
+
+                std::vector<float> value_gen_el_phi;
+                std::vector<float>* pvalue_gen_el_phi = &value_gen_el_phi;
+
+                std::vector<float> value_gen_el_mass;
+                std::vector<float>* pvalue_gen_el_mass = &value_gen_el_mass;
+	
 		
 		//Muons
 		UInt_t value_gen_mu_n;
-		float value_gen_mu_pt[max_gen];
-		float value_gen_mu_eta[max_gen];
-		float value_gen_mu_phi[max_gen];
-		float value_gen_mu_mass[max_gen];
+		
+		std::vector<float> value_gen_mu_pt;
+	      	std::vector<float>* pvalue_gen_mu_pt = &value_gen_mu_pt;		
 
+		std::vector<float> value_gen_mu_eta;
+                std::vector<float>* pvalue_gen_mu_eta = &value_gen_mu_eta;
+
+		std::vector<float> value_gen_mu_phi;
+                std::vector<float>* pvalue_gen_mu_phi = &value_gen_mu_phi;
+	
+		std::vector<float> value_gen_mu_mass;
+                std::vector<float>* pvalue_gen_mu_mass = &value_gen_mu_mass;
+
+		
 		//Taus
-		//	std::vector<ROOT::Math::XYZTVector>  tracks;
+	
+		UInt_t value_gen_tau_n;	
 
+		std::vector<float> value_gen_tau_pt;
+                std::vector<float>* pvalue_gen_tau_pt = &value_gen_tau_pt;
 
-		UInt_t value_gen_tau_n;
-		float value_gen_tau_pt[max_gen];
-		float value_gen_tau_eta[max_gen];
-		float value_gen_tau_phi[max_gen];
-		float value_gen_tau_mass[max_gen];
+                std::vector<float> value_gen_tau_eta;
+                std::vector<float>* pvalue_gen_tau_eta = &value_gen_tau_eta;
 
+                std::vector<float> value_gen_tau_phi;
+                std::vector<float>* pvalue_gen_tau_phi = &value_gen_tau_phi;
 
-
+                std::vector<float> value_gen_tau_mass;
+                std::vector<float>* pvalue_gen_tau_mass = &value_gen_tau_mass;
  
 };
 
@@ -320,25 +343,25 @@ if(isDataFlag_ == false){
   // Generator particles
 
 		//Electrons  
-		  tree->Branch("nGenPart_el", &value_gen_el_n, "nGenPart/i");
-		  tree->Branch("GenPart_el_pt", value_gen_el_pt, "GenPart_pt[nGenPart]/F");
-		  tree->Branch("GenPart_el_eta", value_gen_el_eta, "GenPart_eta[nGenPart]/F");
-		  tree->Branch("GenPart_el_phi", value_gen_el_phi, "GenPart_phi[nGenPart]/F");
-		  tree->Branch("GenPart_el_mass", value_gen_el_mass, "GenPart_mass[nGenPart]/F");
+		  tree->Branch("nGenPart_el", &value_gen_el_n, "nGenPart_el/i");
+		  tree->Branch("GenPart_el_pt", "std::vector <float>", &pvalue_gen_el_pt);
+		  tree->Branch("GenPart_el_eta", "std::vector <float>", &pvalue_gen_el_eta);
+		  tree->Branch("GenPart_el_phi", "std::vector <float>", &pvalue_gen_el_phi);
+		  tree->Branch("GenPart_el_mass", "std::vector <float>", &pvalue_gen_el_mass);
 		//Muons
 	 
-		  tree->Branch("nGenPart_mu", &value_gen_mu_n, "nGenPart/i");
-		  tree->Branch("GenPart_mu_pt", value_gen_mu_pt, "GenPart_pt[nGenPart]/F");
-		  tree->Branch("GenPart_mu_eta", value_gen_mu_eta, "GenPart_eta[nGenPart]/F");
-		  tree->Branch("GenPart_mu_phi", value_gen_mu_phi, "GenPart_phi[nGenPart]/F");
-		  tree->Branch("GenPart_mu_mass", value_gen_mu_mass, "GenPart_mass[nGenPart]/F");
+		  tree->Branch("nGenPart_mu", &value_gen_mu_n, "nGenPart_mu/i");
+		  tree->Branch("GenPart_mu_pt", "std::vector <float>", &pvalue_gen_mu_pt);
+		  tree->Branch("GenPart_mu_eta", "std::vector <float>", &pvalue_gen_mu_eta );
+		  tree->Branch("GenPart_mu_phi", "std::vector <float>", &pvalue_gen_mu_phi);
+		  tree->Branch("GenPart_mu_mass", "std::vector <float>", &pvalue_gen_mu_mass);
 		
 		//Taus
-		  tree->Branch("nGenPart_tau", &value_gen_tau_n, "nGenPart/i");
-		  tree->Branch("GenPart_tau_pt", value_gen_tau_pt, "GenPart_pt[nGenPart]/F");
-		  tree->Branch("GenPart_tau_eta", value_gen_tau_eta, "GenPart_eta[nGenPart]/F");
-		  tree->Branch("GenPart_tau_phi", value_gen_tau_phi, "GenPart_phi[nGenPart]/F");
-		  tree->Branch("GenPart_tau_mass", value_gen_tau_mass, "GenPart_mass[nGenPart]/F");
+		  tree->Branch("nGenPart_tau", &value_gen_tau_n, "nGenPart_tau/i");
+		  tree->Branch("GenPart_tau_pt", "std::vector <float>", &value_gen_tau_pt);
+		  tree->Branch("GenPart_tau_eta", "std::vector <float>", &value_gen_tau_eta);
+		  tree->Branch("GenPart_tau_phi", "std::vector <float>", &value_gen_tau_phi);
+		  tree->Branch("GenPart_tau_mass", "std::vector <float>", &value_gen_tau_mass);
 
 	}
 
@@ -354,6 +377,22 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   using namespace reco;
   using namespace std;
 
+	pvalue_gen_el_pt->clear();
+	pvalue_gen_el_eta->clear();
+	pvalue_gen_el_phi->clear();
+	pvalue_gen_el_mass->clear();
+
+	pvalue_gen_mu_pt->clear();
+	pvalue_gen_mu_eta->clear();
+	pvalue_gen_mu_phi->clear();
+	pvalue_gen_mu_mass->clear();
+
+	pvalue_gen_tau_pt->clear();
+	pvalue_gen_tau_eta->clear();
+	pvalue_gen_tau_phi->clear();
+	pvalue_gen_tau_mass->clear();
+
+	
   // Event information
   value_run = iEvent.run();
   value_lumi_block = iEvent.luminosityBlock();
@@ -582,7 +621,7 @@ if (isDataFlag_ == false){
 const float gen_max_pt = 15000;
 
 
-  //Electrons
+  	//Electrons
 	value_gen_mu_n = 0;
 	value_gen_el_n = 0;
 	value_gen_tau_n = 0; 
@@ -590,20 +629,24 @@ const float gen_max_pt = 15000;
 
    	 if (it->status() == 1 && std::abs(it->pdgId())==11 ) {	//find generatorinfo for PDG Electrons
    		if(it->pt() < gen_max_pt){
-			value_gen_el_pt[value_gen_el_n] = it->pt();
-    	 	 	value_gen_el_eta[value_gen_el_n] = it->eta();
-     		 	value_gen_el_phi[value_gen_el_n] = it->phi();
-     		 	value_gen_el_mass[value_gen_el_n] = it->mass();
+
+			pvalue_gen_el_pt->push_back(it->pt());
+			std:: cout << "gen_el_pt is: " << it->pt() << std::endl;
+			pvalue_gen_el_eta->push_back(it->eta());
+			pvalue_gen_el_phi->push_back(it->phi());
+			pvalue_gen_el_mass->push_back(it->mass());
  		  	value_gen_el_n++;
 		}
 	}
 	//Muons
 	 if (it->status() == 1 && std::abs(it->pdgId()) == 13 ) {   //find generatorinfo for PDG Muons
-                if(it->pt() < gen_max_pt){
-			value_gen_mu_pt[value_gen_mu_n] = it->pt();
-	                value_gen_mu_eta[value_gen_mu_n] = it->eta();
-                	value_gen_mu_phi[value_gen_mu_n] = it->phi();
-                	value_gen_mu_mass[value_gen_mu_n] = it->mass();
+                if(it->pt() < gen_max_pt ){
+
+			pvalue_gen_mu_pt->push_back(it->pt());
+			std:: cout << "gen_mu_pt is: " << it->pt() << std::endl;
+			pvalue_gen_mu_eta->push_back(it->eta());
+                        pvalue_gen_mu_phi->push_back(it->phi());
+                        pvalue_gen_mu_mass->push_back(it->mass());              
                 	value_gen_mu_n++;
 		}
 
@@ -613,12 +656,13 @@ const float gen_max_pt = 15000;
 	
 	//Taus
 	if (it->status() == 2 && std::abs(it->pdgId()) == 15){
-		//std::cout << "tau: " << value_gen_tau_n << "pt: " << it->pt() << std::endl;
-		if(it->pt() < gen_max_pt){
-			value_gen_tau_pt[value_gen_tau_n] = it->pt();
-			value_gen_tau_eta[value_gen_tau_n] = it->eta();
-                	value_gen_tau_phi[value_gen_tau_n] = it->phi();
-      	  	  	value_gen_tau_mass[value_gen_tau_n] = it->mass(); 
+		if(it->pt() < gen_max_pt ){
+			
+			pvalue_gen_tau_pt->push_back(it->pt());
+			std:: cout << "gen_mu_pt is: " << it->pt() << std::endl;
+			pvalue_gen_tau_eta->push_back(it->eta());
+                        pvalue_gen_tau_phi->push_back(it->phi());
+                        pvalue_gen_tau_mass->push_back(it->mass());
                         value_gen_tau_n++;
             	            
 
