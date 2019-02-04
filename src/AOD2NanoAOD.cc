@@ -24,6 +24,8 @@
 #include "TFile.h"
 #include "TTree.h"
 
+#include "TLorentzVector.h"
+
 #include "DataFormats/TrackReco/interface/HitPattern.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -522,45 +524,71 @@ for (auto it = taus->begin(); it != taus->end(); it++) {
 
 		Handle<GenParticleCollection> gens;
 		iEvent.getByLabel(InputTag("genParticles"), gens);
-			float pos_eta = it->eta();
-			float pos_phi = it->phi();
-			bool matched_tau = false;
-			bool matched_el = false;
-			bool matched_mu = false;
-			float DeltaRsq = 0.09;
+		TLorentzVector tau_reco;
+		tau_reco.SetPtEtaPhiM(it->pt(), it->eta(), it->phi(), it->mass());
+		float DeltaR;
+		float pos_eta = it->eta();
+		float pos_phi = it->phi();
+		bool matched_tau = false;
+		bool matched_el = false;
+		bool matched_mu = false;
+		float DeltaR_max = 0.3; 
 			
 		
 
 			for(auto genp = gens->begin(); genp != gens->end(); genp++){	
+				
+				if(genp->status() == 2 && std::abs(genp->pdgId()) == 15 ){	//Taus	
+				TLorentzVector gen_tau_vec; //compose 4vec of generator tau
+				gen_tau_vec.SetPtEtaPhiM(genp->pt(), genp->eta(), genp->phi(), genp->mass());	 	  
 
-				float DeltaRsq_genpart = (pos_eta - (genp->eta() ))*(pos_eta - (genp->eta() )) +(pos_phi - (genp->phi() ))*(pos_phi - (genp->phi() ));
+					for(size_t j = 0; j<genp->numberOfDaughters(); ++j){	//subtract the 4vec of the neutrino of the gen_tau
+						const reco::Candidate* dau = genp->daughter(j);
+						int dID = dau->pdgId();
+						std::cout<<"pdgId is: " << dID <<std::endl;
+						TLorentzVector gen_tau_dau_vec;
+                                                gen_tau_dau_vec.SetPtEtaPhiM(dau->pt(), dau->eta(), dau->phi(), dau->mass());
+						if(std::abs(dID)==12 || std::abs(dID)==14 ||std::abs(dID)==16 ||std::abs(dID)==18){ //pdgIds of neutrinos
+							gen_tau_vec -= gen_tau_dau_vec;
+						}
+						DeltaR = TMath::Sqrt((pos_eta - (gen_tau_vec.Eta() ))*(pos_eta - (gen_tau_vec.Eta() )) +(pos_phi - (gen_tau_vec.Phi() ))*(pos_phi - (gen_tau_vec.Phi() ))); 
+						if(DeltaR < DeltaR_max){
 
-				if( DeltaRsq_genpart < DeltaRsq ){   //in DeltaR cone of 0.3
+							matched_tau = true;
+							matched_el = false;
+							matched_mu = false;
+							DeltaR_max = DeltaR;
+						}
 						
-					
-
-					
-					if(std::abs(genp->pdgId()) == 15){
-					matched_tau = true;
-					matched_el = false;
-					matched_mu = false;
-					DeltaRsq = DeltaRsq_genpart;
 					}
+				}
 
-					if(std::abs(genp->pdgId()) == 11){
-					matched_el = true;
-					matched_tau = false;
-					matched_mu = false;
-					DeltaRsq = DeltaRsq_genpart;
-					}
 
-					if(std::abs(genp->pdgId()) == 13){				
-					matched_mu = true;
-					matched_tau = false;
-					matched_el = false;
-					DeltaRsq = DeltaRsq_genpart;			
-					} 
-				}		
+
+				if(genp->status() == 1 && std::abs(genp->pdgId()) == 11){	//Electrons
+					TLorentzVector gen_el_vec;
+					gen_el_vec.SetPtEtaPhiM(genp->pt(), genp->eta(), genp->phi(), genp->mass());
+					DeltaR = TMath::Sqrt((pos_eta - (gen_el_vec.Eta() ))*(pos_eta - (gen_el_vec.Eta() )) +(pos_phi - (gen_el_vec.Phi() ))*(pos_phi - (gen_el_vec.Phi() )));
+					if( DeltaR < DeltaR_max ){
+						matched_el = true;
+						matched_tau = false;
+						matched_mu = false;
+						DeltaR_max = DeltaR;
+						}
+				}
+				if(genp->status() == 1 && std::abs(genp->pdgId()) == 13){	//Muons
+					TLorentzVector gen_mu_vec;
+                                        gen_mu_vec.SetPtEtaPhiM(genp->pt(), genp->eta(), genp->phi(), genp->mass());
+
+	                                std::cout <<"mu daughter size is: "<< genp->numberOfDaughters()<<std::endl;
+					DeltaR = TMath::Sqrt((pos_eta - (gen_mu_vec.Eta() ))*(pos_eta - (gen_mu_vec.Eta() )) +(pos_phi - (gen_mu_vec.Phi() ))*(pos_phi - (gen_mu_vec.Phi() )));
+					if( DeltaR < DeltaR_max ){				
+						matched_mu = true;
+						matched_tau = false;
+						matched_el = false;
+						DeltaR_max = DeltaR;			
+						} 
+				}	
   				
   			}
 			value_tau_matched_tau[value_tau_n] = matched_tau;
@@ -659,7 +687,7 @@ const float gen_max_pt = 15000;
 		if(it->pt() < gen_max_pt ){
 			
 			pvalue_gen_tau_pt->push_back(it->pt());
-			std:: cout << "gen_mu_pt is: " << it->pt() << std::endl;
+			std:: cout << "gen_tau_pt is: " << it->pt() << std::endl;
 			pvalue_gen_tau_eta->push_back(it->eta());
                         pvalue_gen_tau_phi->push_back(it->phi());
                         pvalue_gen_tau_mass->push_back(it->mass());
